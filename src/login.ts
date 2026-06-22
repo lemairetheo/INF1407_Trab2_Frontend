@@ -1,5 +1,8 @@
 import { clearTokens, login, formatError } from "./api";
+import { initI18n, t } from "./i18n";
 import { showMessage } from "./ui";
+
+initI18n();
 
 // On nettoie toute session existante en arrivant sur la page de login :
 // cela permet de changer de compte sans rester connecte sous l'ancien.
@@ -17,6 +20,6 @@ form.addEventListener("submit", async (event) => {
     await login(username, password);
     window.location.href = "dashboard.html";
   } catch (error) {
-    showMessage(message, formatError(error) || "Usuário ou senha inválidos.", "error");
+    showMessage(message, formatError(error) || t("err_login"), "error");
   }
 });

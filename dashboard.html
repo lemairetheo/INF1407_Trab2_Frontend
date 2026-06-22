@@ -8,27 +8,47 @@
   </head>
   <body>
     <header class="topbar">
-      <h1>📚 Biblioteca Comunitária</h1>
+      <h1 data-i18n="brand">📚 Biblioteca Comunitária</h1>
       <nav>
         <span id="user-info" class="muted"></span>
-        <a href="index.html">Início</a>
-        <a href="change-password.html">Trocar senha</a>
-        <button id="logout">Sair</button>
+        <span id="lang-mount"></span>
+        <a href="index.html" data-i18n="nav_home">Início</a>
+        <a href="change-password.html" data-i18n="nav_change_pw">Trocar senha</a>
+        <button id="logout" data-i18n="nav_logout">Sair</button>
       </nav>
     </header>
 
     <main>
       <!-- Barre d'onglets : les onglets admin sont caches par defaut -->
       <nav class="tabs" id="tabs">
-        <button class="tab active" data-tab="catalog">Catálogo</button>
-        <button class="tab" data-tab="account">Meus empréstimos</button>
-        <button class="tab admin-tab" data-tab="moderation" hidden>
+        <button class="tab active" data-tab="catalog" data-i18n="tab_catalog">
+          Catálogo
+        </button>
+        <button class="tab" data-tab="account" data-i18n="tab_account">
+          Meus empréstimos
+        </button>
+        <button
+          class="tab admin-tab"
+          data-tab="moderation"
+          data-i18n="tab_moderation"
+          hidden
+        >
           Moderação
         </button>
-        <button class="tab admin-tab" data-tab="admin-loans" hidden>
+        <button
+          class="tab admin-tab"
+          data-tab="admin-loans"
+          data-i18n="tab_admin_loans"
+          hidden
+        >
           Empréstimos
         </button>
-        <button class="tab admin-tab" data-tab="admin-reservations" hidden>
+        <button
+          class="tab admin-tab"
+          data-tab="admin-reservations"
+          data-i18n="tab_admin_reservations"
+          hidden
+        >
           Reservas
         </button>
       </nav>
@@ -40,20 +60,28 @@
           <p id="form-hint" class="muted"></p>
           <form id="book-form">
             <input type="hidden" id="book-id" />
-            <label for="title">Título</label>
+            <label for="title" data-i18n="f_title">Título</label>
             <input id="title" required />
 
-            <label for="author">Autor</label>
+            <label for="author" data-i18n="f_author">Autor</label>
             <input id="author" required />
 
-            <label for="description">Descrição</label>
+            <label for="description" data-i18n="f_description">Descrição</label>
             <textarea id="description"></textarea>
 
-            <label for="total_copies">Exemplares</label>
+            <label for="total_copies" data-i18n="f_copies">Exemplares</label>
             <input id="total_copies" type="number" min="1" value="1" />
 
-            <button class="btn" type="submit" id="submit-btn">Enviar</button>
-            <button class="btn secondary" type="button" id="cancel-edit" hidden>
+            <button class="btn" type="submit" id="submit-btn" data-i18n="btn_send">
+              Enviar
+            </button>
+            <button
+              class="btn secondary"
+              type="button"
+              id="cancel-edit"
+              data-i18n="btn_cancel_edit"
+              hidden
+            >
               Cancelar edição
             </button>
           </form>
@@ -61,19 +89,21 @@
         </div>
 
         <div class="card">
-          <h2>Catálogo</h2>
-          <div id="books-list"><p class="muted">Carregando…</p></div>
+          <h2 data-i18n="catalog_title">Catálogo</h2>
+          <div id="books-list">
+            <p class="muted" data-i18n="loading">Carregando…</p>
+          </div>
         </div>
       </section>
 
       <!-- Onglet : compte de l'utilisateur (emprunts + reservas) -->
       <section class="tab-panel" data-panel="account" hidden>
         <div class="card">
-          <h2>Meus empréstimos</h2>
+          <h2 data-i18n="my_loans_title">Meus empréstimos</h2>
           <div id="my-loans"></div>
         </div>
         <div class="card">
-          <h2>Minhas reservas</h2>
+          <h2 data-i18n="my_reservations_title">Minhas reservas</h2>
           <div id="my-reservations"></div>
         </div>
       </section>
@@ -81,7 +111,7 @@
       <!-- Onglet admin : moderation -->
       <section class="tab-panel" data-panel="moderation" hidden>
         <div class="card">
-          <h2>Aguardando aprovação</h2>
+          <h2 data-i18n="tab_moderation">Moderação</h2>
           <div id="pending-list"></div>
         </div>
       </section>
@@ -89,7 +119,7 @@
       <!-- Onglet admin : tous les emprunts -->
       <section class="tab-panel" data-panel="admin-loans" hidden>
         <div class="card">
-          <h2>Todos os empréstimos</h2>
+          <h2 data-i18n="all_loans_title">Todos os empréstimos</h2>
           <div id="all-loans"></div>
         </div>
       </section>
@@ -97,7 +127,7 @@
       <!-- Onglet admin : toutes les reservations -->
       <section class="tab-panel" data-panel="admin-reservations" hidden>
         <div class="card">
-          <h2>Todas as reservas</h2>
+          <h2 data-i18n="all_reservations_title">Todas as reservas</h2>
           <div id="all-reservations"></div>
         </div>
       </section>

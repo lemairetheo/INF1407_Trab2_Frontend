@@ -75,6 +75,28 @@ main {
   padding: 0 1rem;
 }
 
+.lang-select {
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lang-select option {
+  color: var(--ink);
+}
+
+/* Sur les pages d'authentification, le selecteur est sur fond clair. */
+.auth-wrapper .lang-select {
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--border);
+}
+
 .tabs {
   display: flex;
   gap: 0.25rem;

@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Entrar — Biblioteca Comunitária</title>
+    <title>Login — Biblioteca Comunitária</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <div class="auth-wrapper">
       <div class="card">
-        <h2>Entrar</h2>
+        <div style="text-align: right"><span id="lang-mount"></span></div>
+        <h2 data-i18n="login_title">Entrar</h2>
         <form id="login-form">
-          <label for="username">Usuário</label>
+          <label for="username" data-i18n="f_user">Usuário</label>
           <input id="username" name="username" required autocomplete="username" />
 
-          <label for="password">Senha</label>
+          <label for="password" data-i18n="f_password">Senha</label>
           <input
             id="password"
             name="password"
@@ -23,11 +24,16 @@
             autocomplete="current-password"
           />
 
-          <button class="btn" type="submit">Entrar</button>
+          <button class="btn" type="submit" data-i18n="btn_login">Entrar</button>
         </form>
         <div id="message"></div>
-        <p class="center-link"><a href="forgot-password.html">Esqueci minha senha</a></p>
-        <p class="center-link">Não tem conta? <a href="register.html">Cadastre-se</a></p>
+        <p class="center-link">
+          <a href="forgot-password.html" data-i18n="forgot_link">Esqueci minha senha</a>
+        </p>
+        <p class="center-link">
+          <span data-i18n="no_account">Não tem conta?</span>
+          <a href="register.html" data-i18n="register_link">Cadastre-se</a>
+        </p>
       </div>
     </div>
     <script type="module" src="/src/login.ts"></script>

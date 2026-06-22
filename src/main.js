@@ -1,6 +1,8 @@
 import { approveBook, borrowBook, cancelReservation, clearTokens, createBook, createReview, deleteBook, deleteReview, formatError, getMe, listBooks, listLoans, listReservations, requireAuth, reserveBook, returnLoan, updateBook, } from "./api";
+import { initI18n, t } from "./i18n";
 import { escapeHtml, showMessage } from "./ui";
 requireAuth();
+initI18n();
 let me = null;
 // --- Elements ---------------------------------------------------------------
 const userInfo = document.getElementById("user-info");
@@ -22,7 +24,7 @@ const allReservationsEl = document.getElementById("all-reservations");
 const tabs = document.querySelectorAll(".tab");
 const panels = document.querySelectorAll(".tab-panel");
 function activateTab(name) {
-    tabs.forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+    tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === name));
     panels.forEach((p) => (p.hidden = p.dataset.panel !== name));
 }
 tabs.forEach((tab) => {
@@ -46,12 +48,12 @@ async function init() {
     }
     userInfo.textContent = `${me.username}${me.is_staff ? " (admin)" : ""}`;
     if (me.is_staff) {
-        formTitle.textContent = "Adicionar um livro";
-        formHint.textContent = "Como admin, o livro será publicado diretamente.";
+        formTitle.textContent = t("form_title_add");
+        formHint.textContent = t("hint_admin");
     }
     else {
-        formHint.textContent =
-            "Sua sugestão ficará pendente até a aprovação de um administrador.";
+        formTitle.textContent = t("form_title_suggest");
+        formHint.textContent = t("hint_user");
     }
     // On revele les onglets reserves a l'administrateur.
     if (me.is_staff) {
@@ -91,7 +93,7 @@ async function loadLoansAndReservations() {
 // `own` : vrai pour les listes personnelles (boutons d'action actifs).
 function renderLoans(el, loans, own) {
     if (loans.length === 0) {
-        el.innerHTML = `<p class="muted">Nenhum empréstimo.</p>`;
+        el.innerHTML = `<p class="muted">${t("no_loans")}</p>`;
         return;
     }
     el.innerHTML = loans
@@ -99,14 +101,14 @@ function renderLoans(el, loans, own) {
         const who = own ? "" : ` · ${escapeHtml(l.user)}`;
         const returned = l.status === "returned";
         const badge = returned
-            ? `<span class="badge approved">Devolvido</span>`
-            : `<span class="badge pending">Em andamento</span>`;
+            ? `<span class="badge approved">${t("loan_returned")}</span>`
+            : `<span class="badge pending">${t("loan_active")}</span>`;
         const returnBtn = own && !returned
-            ? `<button class="btn small" data-return="${l.id}">Devolver</button>`
+            ? `<button class="btn small" data-return="${l.id}">${t("btn_return")}</button>`
             : "";
         return `<div class="review">
         <span>${escapeHtml(l.book_title)}${who} ${badge}
-          <span class="muted">— vencimento ${l.due_date}</span></span>
+          <span class="muted">— ${t("due")} ${l.due_date}</span></span>
         ${returnBtn}
       </div>`;
     })
@@ -114,19 +116,19 @@ function renderLoans(el, loans, own) {
 }
 function renderReservations(el, reservations, own) {
     if (reservations.length === 0) {
-        el.innerHTML = `<p class="muted">Nenhuma reserva.</p>`;
+        el.innerHTML = `<p class="muted">${t("no_reservations")}</p>`;
         return;
     }
     el.innerHTML = reservations
         .map((r) => {
         const who = own ? "" : ` · ${escapeHtml(r.user)}`;
         const labels = {
-            waiting: "Na fila",
-            fulfilled: "Disponível",
-            cancelled: "Cancelada",
+            waiting: t("res_waiting"),
+            fulfilled: t("res_fulfilled"),
+            cancelled: t("res_cancelled"),
         };
         const cancelBtn = own && r.status === "waiting"
-            ? `<button class="btn small danger" data-cancelres="${r.id}">Cancelar</button>`
+            ? `<button class="btn small danger" data-cancelres="${r.id}">${t("btn_cancel")}</button>`
             : "";
         return `<div class="review">
         <span>${escapeHtml(r.book_title)}${who}
@@ -152,7 +154,7 @@ async function loadBooks() {
         const approved = books.filter((b) => b.status === "approved");
         pendingList.innerHTML = pending.length
             ? pending.map(renderBook).join("")
-            : `<p class="muted">Nada para aprovar.</p>`;
+            : `<p class="muted">${t("nothing_to_approve")}</p>`;
         renderCatalog(approved);
     }
     else {
@@ -162,7 +164,7 @@ async function loadBooks() {
 }
 function renderCatalog(books) {
     if (books.length === 0) {
-        booksList.innerHTML = `<p class="muted">Nenhum livro ainda.</p>`;
+        booksList.innerHTML = `<p class="muted">${t("no_books")}</p>`;
         return;
     }
     booksList.innerHTML = books.map(renderBook).join("");
@@ -171,34 +173,34 @@ function renderBook(book) {
     const canEdit = me?.is_staff || me?.username === book.created_by;
     const isPending = book.status === "pending";
     const editButtons = canEdit
-        ? `<button class="btn small secondary" data-edit="${book.id}">Editar</button>
-       <button class="btn small danger" data-delete="${book.id}">Excluir</button>`
+        ? `<button class="btn small secondary" data-edit="${book.id}">${t("btn_edit")}</button>
+       <button class="btn small danger" data-delete="${book.id}">${t("btn_delete")}</button>`
         : "";
     const approveButton = me?.is_staff && isPending
-        ? `<button class="btn small" data-approve="${book.id}">Aprovar</button>`
+        ? `<button class="btn small" data-approve="${book.id}">${t("btn_approve")}</button>`
         : "";
     // Bouton d'emprunt / reservation (uniquement pour les livres approuves).
     let loanButton = "";
     let availability = "";
     if (!isPending) {
-        availability = `<span class="muted"> · ${book.available_copies}/${book.total_copies} disponível(eis)</span>`;
+        availability = `<span class="muted"> · ${book.available_copies}/${book.total_copies} ${t("available")}</span>`;
         if (activeLoanBookIds.has(book.id)) {
-            loanButton = `<span class="badge approved">Você tem este livro</span>`;
+            loanButton = `<span class="badge approved">${t("have_book")}</span>`;
         }
         else if (book.available_copies > 0) {
-            loanButton = `<button class="btn small" data-borrow="${book.id}">Emprestar</button>`;
+            loanButton = `<button class="btn small" data-borrow="${book.id}">${t("btn_borrow")}</button>`;
         }
         else {
-            loanButton = `<button class="btn small secondary" data-reserve="${book.id}">Reservar</button>`;
+            loanButton = `<button class="btn small secondary" data-reserve="${book.id}">${t("btn_reserve")}</button>`;
         }
     }
     return `
     <div class="book">
       <h3>${escapeHtml(book.title)}
-        <span class="badge ${book.status}">${isPending ? "Pendente" : "Aprovado"}</span>
+        <span class="badge ${book.status}">${isPending ? t("badge_pending") : t("badge_approved")}</span>
       </h3>
-      <div class="meta">por ${escapeHtml(book.author)} ·
-        sugerido por ${escapeHtml(book.created_by)}${availability}</div>
+      <div class="meta">${t("by")} ${escapeHtml(book.author)} ·
+        ${t("suggested_by")} ${escapeHtml(book.created_by)}${availability}</div>
       ${book.description ? `<p>${escapeHtml(book.description)}</p>` : ""}
       <div class="actions">${loanButton}${approveButton}${editButtons}</div>
       ${renderReviews(book)}
@@ -229,8 +231,8 @@ function renderReviews(book) {
             <option value="2">★★</option>
             <option value="1">★</option>
           </select>
-          <input data-comment placeholder="Deixe um comentário" />
-          <button class="btn small" type="submit">Avaliar</button>
+          <input data-comment placeholder="${t("leave_comment")}" />
+          <button class="btn small" type="submit">${t("btn_review")}</button>
         </form>`
         : "";
     return `<div class="reviews">${items || ""}${reviewForm}</div>`;
@@ -315,7 +317,7 @@ async function handleApprove(id) {
     }
 }
 async function handleDelete(id) {
-    if (!confirm("Excluir este livro?"))
+    if (!confirm(t("confirm_delete")))
         return;
     try {
         await deleteBook(id);
@@ -360,8 +362,8 @@ function startEdit(id) {
         document.getElementById("description").value =
             book.description;
         document.getElementById("total_copies").value = String(book.total_copies);
-        formTitle.textContent = "Editar livro";
-        submitBtn.textContent = "Salvar";
+        formTitle.textContent = t("form_title_edit");
+        submitBtn.textContent = t("btn_save");
         cancelEdit.hidden = false;
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
@@ -369,8 +371,10 @@ function startEdit(id) {
 function resetForm() {
     form.reset();
     bookIdInput.value = "";
-    formTitle.textContent = me?.is_staff ? "Adicionar um livro" : "Sugerir um livro";
-    submitBtn.textContent = "Enviar";
+    formTitle.textContent = me?.is_staff
+        ? t("form_title_add")
+        : t("form_title_suggest");
+    submitBtn.textContent = t("btn_send");
     cancelEdit.hidden = true;
 }
 cancelEdit.addEventListener("click", resetForm);
@@ -387,13 +391,11 @@ form.addEventListener("submit", async (event) => {
     try {
         if (editingId) {
             await updateBook(editingId, data);
-            showMessage(formMessage, "Livro atualizado.", "success");
+            showMessage(formMessage, t("msg_book_updated"), "success");
         }
         else {
             await createBook(data);
-            showMessage(formMessage, me?.is_staff
-                ? "Livro publicado."
-                : "Sugestão enviada! Aguardando aprovação.", "success");
+            showMessage(formMessage, me?.is_staff ? t("msg_book_published") : t("msg_suggestion_sent"), "success");
         }
         resetForm();
         await refresh();

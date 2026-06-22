@@ -1,5 +1,8 @@
 import { requestPasswordReset, formatError } from "./api";
+import { initI18n, t } from "./i18n";
 import { showMessage } from "./ui";
+
+initI18n();
 
 const form = document.getElementById("forgot-form") as HTMLFormElement;
 const message = document.getElementById("message") as HTMLElement;
@@ -10,11 +13,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     await requestPasswordReset(email);
-    showMessage(
-      message,
-      "Se houver uma conta com esse email, um link foi enviado.",
-      "success",
-    );
+    showMessage(message, t("forgot_done"), "success");
   } catch (error) {
     showMessage(message, formatError(error), "error");
   }

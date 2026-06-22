@@ -1,6 +1,8 @@
 import { changePassword, clearTokens, formatError, requireAuth } from "./api";
+import { initI18n, t } from "./i18n";
 import { showMessage } from "./ui";
 requireAuth();
+initI18n();
 const form = document.getElementById("change-form");
 const message = document.getElementById("message");
 const logout = document.getElementById("logout");
@@ -14,7 +16,7 @@ form.addEventListener("submit", async (event) => {
     const newPassword = document.getElementById("new").value;
     try {
         await changePassword(oldPassword, newPassword);
-        showMessage(message, "Senha alterada com sucesso!", "success");
+        showMessage(message, t("change_success"), "success");
         form.reset();
     }
     catch (error) {

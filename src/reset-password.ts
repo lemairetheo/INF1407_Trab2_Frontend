@@ -1,5 +1,8 @@
 import { confirmPasswordReset, formatError } from "./api";
+import { initI18n, t } from "./i18n";
 import { showMessage } from "./ui";
+
+initI18n();
 
 // uid et token sont passes dans l'URL (lien recu par email).
 const params = new URLSearchParams(window.location.search);
@@ -10,7 +13,7 @@ const form = document.getElementById("reset-form") as HTMLFormElement;
 const message = document.getElementById("message") as HTMLElement;
 
 if (!uid || !token) {
-  showMessage(message, "Link inválido ou incompleto.", "error");
+  showMessage(message, t("reset_link_invalid"), "error");
 }
 
 form.addEventListener("submit", async (event) => {
@@ -19,11 +22,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     await confirmPasswordReset(uid, token, password);
-    showMessage(
-      message,
-      "Senha redefinida com sucesso! Redirecionando…",
-      "success",
-    );
+    showMessage(message, t("reset_done"), "success");
     setTimeout(() => (window.location.href = "login.html"), 1500);
   } catch (error) {
     showMessage(message, formatError(error), "error");

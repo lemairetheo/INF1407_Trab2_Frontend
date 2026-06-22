@@ -9,21 +9,25 @@
   <body>
     <div class="auth-wrapper">
       <div class="card">
-        <h2>Criar conta</h2>
+        <div style="text-align: right"><span id="lang-mount"></span></div>
+        <h2 data-i18n="reg_title">Criar conta</h2>
         <form id="register-form">
-          <label for="username">Usuário</label>
+          <label for="username" data-i18n="f_user">Usuário</label>
           <input id="username" required autocomplete="username" />
 
-          <label for="email">Email</label>
+          <label for="email" data-i18n="f_email">Email</label>
           <input id="email" type="email" required autocomplete="email" />
 
-          <label for="password">Senha</label>
+          <label for="password" data-i18n="f_password">Senha</label>
           <input id="password" type="password" required autocomplete="new-password" />
 
-          <button class="btn" type="submit">Cadastrar</button>
+          <button class="btn" type="submit" data-i18n="btn_register">Cadastrar</button>
         </form>
         <div id="message"></div>
-        <p class="center-link">Já tem conta? <a href="login.html">Entrar</a></p>
+        <p class="center-link">
+          <span data-i18n="have_account">Já tem conta?</span>
+          <a href="login.html" data-i18n="login_link">Entrar</a>
+        </p>
       </div>
     </div>
     <script type="module" src="/src/register.ts"></script>

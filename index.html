@@ -8,28 +8,28 @@
   </head>
   <body>
     <header class="topbar">
-      <h1>📚 Biblioteca Comunitária</h1>
-      <nav id="nav"></nav>
+      <h1 data-i18n="brand">📚 Biblioteca Comunitária</h1>
+      <nav id="nav"><span id="lang-mount"></span></nav>
     </header>
 
     <main>
       <!-- Appel a l'action pour les visiteurs non connectes -->
       <div class="card" id="cta" hidden>
-        <h2>Bem-vindo(a) à Biblioteca Comunitária</h2>
-        <p>
-          Explore livremente o catálogo abaixo. Quer
-          <strong>sugerir um livro</strong> ou deixar uma avaliação?
+        <h2 data-i18n="welcome_title">Bem-vindo(a) à Biblioteca Comunitária</h2>
+        <p data-i18n="welcome_text">
+          Explore livremente o catálogo abaixo. Quer sugerir um livro ou deixar
+          uma avaliação?
         </p>
         <div class="actions">
-          <a class="btn" href="register.html">Cadastre-se</a>
-          <a class="btn secondary" href="login.html">Entrar</a>
+          <a class="btn" href="register.html" data-i18n="register_link">Cadastre-se</a>
+          <a class="btn secondary" href="login.html" data-i18n="nav_login">Entrar</a>
         </div>
       </div>
 
       <!-- Catalogue public (livres aprovados) -->
       <div class="card">
-        <h2>Catálogo</h2>
-        <div id="books-list"><p class="muted">Carregando…</p></div>
+        <h2 data-i18n="catalog_title">Catálogo</h2>
+        <div id="books-list"><p class="muted" data-i18n="loading">Carregando…</p></div>
       </div>
     </main>
 
