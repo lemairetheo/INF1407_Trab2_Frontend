@@ -75,6 +75,35 @@ main {
   padding: 0 1rem;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.6rem 1rem;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: var(--accent);
+}
+
+.tab.active {
+  color: var(--accent-dark);
+  border-bottom-color: var(--accent);
+  font-weight: bold;
+}
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);

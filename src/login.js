@@ -1,8 +1,8 @@
-import { isLoggedIn, login, formatError } from "./api";
+import { clearTokens, login, formatError } from "./api";
 import { showMessage } from "./ui";
-if (isLoggedIn()) {
-    window.location.href = "dashboard.html";
-}
+// On nettoie toute session existante en arrivant sur la page de login :
+// cela permet de changer de compte sans rester connecte sous l'ancien.
+clearTokens();
 const form = document.getElementById("login-form");
 const message = document.getElementById("message");
 form.addEventListener("submit", async (event) => {

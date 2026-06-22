@@ -139,6 +139,25 @@ export function deleteBook(id) {
 export function approveBook(id) {
     return request(`/books/${id}/approve/`, { method: "POST" });
 }
+// --- Emprunts et reservations ----------------------------------------------
+export function borrowBook(id) {
+    return request(`/books/${id}/borrow/`, { method: "POST" });
+}
+export function reserveBook(id) {
+    return request(`/books/${id}/reserve/`, { method: "POST" });
+}
+export function listLoans() {
+    return request("/loans/");
+}
+export function returnLoan(id) {
+    return request(`/loans/${id}/return/`, { method: "POST" });
+}
+export function listReservations() {
+    return request("/reservations/");
+}
+export function cancelReservation(id) {
+    return request(`/reservations/${id}/`, { method: "DELETE" });
+}
 // --- Avis ------------------------------------------------------------------
 export function createReview(book, rating, comment) {
     return request("/reviews/", {

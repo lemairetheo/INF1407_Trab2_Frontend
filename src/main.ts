@@ -1,5 +1,7 @@
 import {
   approveBook,
+  borrowBook,
+  cancelReservation,
   clearTokens,
   createBook,
   createReview,
@@ -8,10 +10,16 @@ import {
   formatError,
   getMe,
   listBooks,
+  listLoans,
+  listReservations,
   requireAuth,
+  reserveBook,
+  returnLoan,
   updateBook,
   type Book,
   type CurrentUser,
+  type Loan,
+  type Reservation,
 } from "./api";
 import { escapeHtml, showMessage } from "./ui";
 
@@ -29,9 +37,28 @@ const formMessage = document.getElementById("form-message") as HTMLElement;
 const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
 const cancelEdit = document.getElementById("cancel-edit") as HTMLButtonElement;
 const bookIdInput = document.getElementById("book-id") as HTMLInputElement;
-const pendingCard = document.getElementById("pending-card") as HTMLElement;
 const pendingList = document.getElementById("pending-list") as HTMLElement;
 const booksList = document.getElementById("books-list") as HTMLElement;
+const myLoansEl = document.getElementById("my-loans") as HTMLElement;
+const myReservationsEl = document.getElementById("my-reservations") as HTMLElement;
+const allLoansEl = document.getElementById("all-loans") as HTMLElement;
+const allReservationsEl = document.getElementById("all-reservations") as HTMLElement;
+
+// --- Navigation par onglets -------------------------------------------------
+const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+const panels = document.querySelectorAll<HTMLElement>(".tab-panel");
+
+function activateTab(name: string): void {
+  tabs.forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  panels.forEach((p) => (p.hidden = p.dataset.panel !== name));
+}
+
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => activateTab(tab.dataset.tab as string));
+});
+
+// Ids des livres que l'utilisateur a deja empruntes (emprunt actif).
+let activeLoanBookIds = new Set<number>();
 
 logoutBtn.addEventListener("click", () => {
   clearTokens();
@@ -57,7 +84,115 @@ async function init(): Promise<void> {
       "Sua sugestão ficará pendente até a aprovação de um administrador.";
   }
 
+  // On revele les onglets reserves a l'administrateur.
+  if (me.is_staff) {
+    document
+      .querySelectorAll<HTMLElement>(".admin-tab")
+      .forEach((t) => (t.hidden = false));
+  }
+
+  await refresh();
+}
+
+// Recharge l'ensemble des donnees (livres, emprunts, reservations).
+async function refresh(): Promise<void> {
+  await loadLoansAndReservations();
   await loadBooks();
+}
+
+// --- Emprunts et reservations ----------------------------------------------
+async function loadLoansAndReservations(): Promise<void> {
+  try {
+    const [loans, reservations] = await Promise.all([
+      listLoans(),
+      listReservations(),
+    ]);
+
+    // Emprunts de l'utilisateur courant (pour adapter les boutons du catalogue).
+    activeLoanBookIds = new Set(
+      loans
+        .filter((l) => l.user === me?.username && l.status === "active")
+        .map((l) => l.book),
+    );
+
+    renderLoans(
+      myLoansEl,
+      loans.filter((l) => l.user === me?.username),
+      true,
+    );
+    renderReservations(
+      myReservationsEl,
+      reservations.filter((r) => r.user === me?.username),
+      true,
+    );
+
+    if (me?.is_staff) {
+      renderLoans(allLoansEl, loans, false);
+      renderReservations(allReservationsEl, reservations, false);
+    }
+  } catch (error) {
+    myLoansEl.innerHTML = `<p class="message error">${escapeHtml(
+      formatError(error),
+    )}</p>`;
+  }
+}
+
+// `own` : vrai pour les listes personnelles (boutons d'action actifs).
+function renderLoans(el: HTMLElement, loans: Loan[], own: boolean): void {
+  if (loans.length === 0) {
+    el.innerHTML = `<p class="muted">Nenhum empréstimo.</p>`;
+    return;
+  }
+  el.innerHTML = loans
+    .map((l) => {
+      const who = own ? "" : ` · ${escapeHtml(l.user)}`;
+      const returned = l.status === "returned";
+      const badge = returned
+        ? `<span class="badge approved">Devolvido</span>`
+        : `<span class="badge pending">Em andamento</span>`;
+      const returnBtn =
+        own && !returned
+          ? `<button class="btn small" data-return="${l.id}">Devolver</button>`
+          : "";
+      return `<div class="review">
+        <span>${escapeHtml(l.book_title)}${who} ${badge}
+          <span class="muted">— vencimento ${l.due_date}</span></span>
+        ${returnBtn}
+      </div>`;
+    })
+    .join("");
+}
+
+function renderReservations(
+  el: HTMLElement,
+  reservations: Reservation[],
+  own: boolean,
+): void {
+  if (reservations.length === 0) {
+    el.innerHTML = `<p class="muted">Nenhuma reserva.</p>`;
+    return;
+  }
+  el.innerHTML = reservations
+    .map((r) => {
+      const who = own ? "" : ` · ${escapeHtml(r.user)}`;
+      const labels: Record<string, string> = {
+        waiting: "Na fila",
+        fulfilled: "Disponível",
+        cancelled: "Cancelada",
+      };
+      const cancelBtn =
+        own && r.status === "waiting"
+          ? `<button class="btn small danger" data-cancelres="${r.id}">Cancelar</button>`
+          : "";
+      return `<div class="review">
+        <span>${escapeHtml(r.book_title)}${who}
+          <span class="badge ${
+            r.status === "fulfilled" ? "approved" : "pending"
+          }">${labels[r.status]}</span></span>
+        ${cancelBtn}
+      </div>`;
+    })
+    .join("");
 }
 
 // --- Chargement et rendu des livres -----------------------------------------
@@ -72,17 +207,15 @@ async function loadBooks(): Promise<void> {
     return;
   }
 
-  // L'admin a une zone de moderation separee des livres approuves.
+  // L'admin a un onglet de moderation separe des livres approuves.
   if (me?.is_staff) {
     const pending = books.filter((b) => b.status === "pending");
     const approved = books.filter((b) => b.status === "approved");
-    pendingCard.hidden = pending.length === 0;
     pendingList.innerHTML = pending.length
       ? pending.map(renderBook).join("")
-      : "";
+      : `<p class="muted">Nada para aprovar.</p>`;
     renderCatalog(approved);
   } else {
-    pendingCard.hidden = true;
     renderCatalog(books);
   }
 
@@ -111,6 +244,20 @@ function renderBook(book: Book): string {
       ? `<button class="btn small" data-approve="${book.id}">Aprovar</button>`
       : "";
 
+  // Bouton d'emprunt / reservation (uniquement pour les livres approuves).
+  let loanButton = "";
+  let availability = "";
+  if (!isPending) {
+    availability = `<span class="muted"> · ${book.available_copies}/${book.total_copies} disponível(eis)</span>`;
+    if (activeLoanBookIds.has(book.id)) {
+      loanButton = `<span class="badge approved">Você tem este livro</span>`;
+    } else if (book.available_copies > 0) {
+      loanButton = `<button class="btn small" data-borrow="${book.id}">Emprestar</button>`;
+    } else {
+      loanButton = `<button class="btn small secondary" data-reserve="${book.id}">Reservar</button>`;
+    }
+  }
+
   return `
     <div class="book">
       <h3>${escapeHtml(book.title)}
@@ -119,9 +266,9 @@ function renderBook(book: Book): string {
         }</span>
       </h3>
       <div class="meta">por ${escapeHtml(book.author)} ·
-        sugerido por ${escapeHtml(book.created_by)}</div>
+        sugerido por ${escapeHtml(book.created_by)}${availability}</div>
       ${book.description ? `<p>${escapeHtml(book.description)}</p>` : ""}
-      <div class="actions">${approveButton}${editButtons}</div>
+      <div class="actions">${loanButton}${approveButton}${editButtons}</div>
       ${renderReviews(book)}
     </div>`;
 }
@@ -181,15 +328,67 @@ function attachBookHandlers(): void {
         handleDeleteReview(Number(btn.dataset.delreview)),
       );
     });
+  document.querySelectorAll<HTMLButtonElement>("[data-borrow]").forEach((btn) => {
+    btn.addEventListener("click", () => handleBorrow(Number(btn.dataset.borrow)));
+  });
+  document.querySelectorAll<HTMLButtonElement>("[data-reserve]").forEach((btn) => {
+    btn.addEventListener("click", () => handleReserve(Number(btn.dataset.reserve)));
+  });
+  document.querySelectorAll<HTMLButtonElement>("[data-return]").forEach((btn) => {
+    btn.addEventListener("click", () => handleReturn(Number(btn.dataset.return)));
+  });
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-cancelres]")
+    .forEach((btn) => {
+      btn.addEventListener("click", () =>
+        handleCancelReservation(Number(btn.dataset.cancelres)),
+      );
+    });
   document.querySelectorAll<HTMLFormElement>(".review-form").forEach((f) => {
     f.addEventListener("submit", (e) => handleReview(e, f));
   });
 }
 
+async function handleBorrow(id: number): Promise<void> {
+  try {
+    await borrowBook(id);
+    await refresh();
+  } catch (error) {
+    alert(formatError(error));
+  }
+}
+
+async function handleReserve(id: number): Promise<void> {
+  try {
+    await reserveBook(id);
+    await refresh();
+  } catch (error) {
+    alert(formatError(error));
+  }
+}
+
+async function handleReturn(id: number): Promise<void> {
+  try {
+    await returnLoan(id);
+    await refresh();
+  } catch (error) {
+    alert(formatError(error));
+  }
+}
+
+async function handleCancelReservation(id: number): Promise<void> {
+  try {
+    await cancelReservation(id);
+    await refresh();
+  } catch (error) {
+    alert(formatError(error));
+  }
+}
+
 async function handleApprove(id: number): Promise<void> {
   try {
     await approveBook(id);
-    await loadBooks();
+    await refresh();
   } catch (error) {
     alert(formatError(error));
   }
@@ -199,7 +398,7 @@ async function handleDelete(id: number): Promise<void> {
   if (!confirm("Excluir este livro?")) return;
   try {
     await deleteBook(id);
-    await loadBooks();
+    await refresh();
   } catch (error) {
     alert(formatError(error));
   }
@@ -208,7 +407,7 @@ async function handleDelete(id: number): Promise<void> {
 async function handleDeleteReview(id: number): Promise<void> {
   try {
     await deleteReview(id);
-    await loadBooks();
+    await refresh();
   } catch (error) {
     alert(formatError(error));
   }
@@ -223,7 +422,7 @@ async function handleReview(event: Event, f: HTMLFormElement): Promise<void> {
   const comment = (f.querySelector("[data-comment]") as HTMLInputElement).value;
   try {
     await createReview(book, rating, comment);
-    await loadBooks();
+    await refresh();
   } catch (error) {
     alert(formatError(error));
   }
@@ -240,6 +439,9 @@ function startEdit(id: number): void {
     (document.getElementById("author") as HTMLInputElement).value = book.author;
     (document.getElementById("description") as HTMLTextAreaElement).value =
       book.description;
+    (document.getElementById("total_copies") as HTMLInputElement).value = String(
+      book.total_copies,
+    );
     formTitle.textContent = "Editar livro";
     submitBtn.textContent = "Salvar";
     cancelEdit.hidden = false;
@@ -264,6 +466,9 @@ form.addEventListener("submit", async (event) => {
     author: (document.getElementById("author") as HTMLInputElement).value,
     description: (document.getElementById("description") as HTMLTextAreaElement)
       .value,
+    total_copies: Number(
+      (document.getElementById("total_copies") as HTMLInputElement).value || "1",
+    ),
   };
   const editingId = bookIdInput.value ? Number(bookIdInput.value) : null;
 
@@ -282,7 +487,7 @@ form.addEventListener("submit", async (event) => {
       );
     }
     resetForm();
-    await loadBooks();
+    await refresh();
   } catch (error) {
     showMessage(formMessage, formatError(error), "error");
   }

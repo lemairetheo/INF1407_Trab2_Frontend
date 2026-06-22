@@ -50,7 +50,8 @@ function renderBook(book: Book): string {
     <div class="book">
       <h3>${escapeHtml(book.title)}</h3>
       <div class="meta">por ${escapeHtml(book.author)} ·
-        sugerido por ${escapeHtml(book.created_by)}</div>
+        sugerido por ${escapeHtml(book.created_by)} ·
+        ${book.available_copies}/${book.total_copies} disponível(eis)</div>
       ${book.description ? `<p>${escapeHtml(book.description)}</p>` : ""}
       ${renderReviews(book)}
     </div>`;

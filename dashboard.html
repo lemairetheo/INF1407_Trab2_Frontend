@@ -18,40 +18,89 @@
     </header>
 
     <main>
-      <!-- Formulaire d'ajout / sugestao de livre -->
-      <div class="card">
-        <h2 id="form-title">Sugerir um livro</h2>
-        <p id="form-hint" class="muted"></p>
-        <form id="book-form">
-          <input type="hidden" id="book-id" />
-          <label for="title">Título</label>
-          <input id="title" required />
+      <!-- Barre d'onglets : les onglets admin sont caches par defaut -->
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-tab="catalog">Catálogo</button>
+        <button class="tab" data-tab="account">Meus empréstimos</button>
+        <button class="tab admin-tab" data-tab="moderation" hidden>
+          Moderação
+        </button>
+        <button class="tab admin-tab" data-tab="admin-loans" hidden>
+          Empréstimos
+        </button>
+        <button class="tab admin-tab" data-tab="admin-reservations" hidden>
+          Reservas
+        </button>
+      </nav>
 
-          <label for="author">Autor</label>
-          <input id="author" required />
+      <!-- Onglet : Catálogo (formulaire + liste) -->
+      <section class="tab-panel" data-panel="catalog">
+        <div class="card">
+          <h2 id="form-title">Sugerir um livro</h2>
+          <p id="form-hint" class="muted"></p>
+          <form id="book-form">
+            <input type="hidden" id="book-id" />
+            <label for="title">Título</label>
+            <input id="title" required />
 
-          <label for="description">Descrição</label>
-          <textarea id="description"></textarea>
+            <label for="author">Autor</label>
+            <input id="author" required />
 
-          <button class="btn" type="submit" id="submit-btn">Enviar</button>
-          <button class="btn secondary" type="button" id="cancel-edit" hidden>
-            Cancelar edição
-          </button>
-        </form>
-        <div id="form-message"></div>
-      </div>
+            <label for="description">Descrição</label>
+            <textarea id="description"></textarea>
 
-      <!-- Zone de moderation (admin uniquement) -->
-      <div class="card" id="pending-card" hidden>
-        <h2>Aguardando aprovação</h2>
-        <div id="pending-list"></div>
-      </div>
+            <label for="total_copies">Exemplares</label>
+            <input id="total_copies" type="number" min="1" value="1" />
 
-      <!-- Catalogue -->
-      <div class="card">
-        <h2>Catálogo</h2>
-        <div id="books-list"><p class="muted">Carregando…</p></div>
-      </div>
+            <button class="btn" type="submit" id="submit-btn">Enviar</button>
+            <button class="btn secondary" type="button" id="cancel-edit" hidden>
+              Cancelar edição
+            </button>
+          </form>
+          <div id="form-message"></div>
+        </div>
+
+        <div class="card">
+          <h2>Catálogo</h2>
+          <div id="books-list"><p class="muted">Carregando…</p></div>
+        </div>
+      </section>
+
+      <!-- Onglet : compte de l'utilisateur (emprunts + reservas) -->
+      <section class="tab-panel" data-panel="account" hidden>
+        <div class="card">
+          <h2>Meus empréstimos</h2>
+          <div id="my-loans"></div>
+        </div>
+        <div class="card">
+          <h2>Minhas reservas</h2>
+          <div id="my-reservations"></div>
+        </div>
+      </section>
+
+      <!-- Onglet admin : moderation -->
+      <section class="tab-panel" data-panel="moderation" hidden>
+        <div class="card">
+          <h2>Aguardando aprovação</h2>
+          <div id="pending-list"></div>
+        </div>
+      </section>
+
+      <!-- Onglet admin : tous les emprunts -->
+      <section class="tab-panel" data-panel="admin-loans" hidden>
+        <div class="card">
+          <h2>Todos os empréstimos</h2>
+          <div id="all-loans"></div>
+        </div>
+      </section>
+
+      <!-- Onglet admin : toutes les reservations -->
+      <section class="tab-panel" data-panel="admin-reservations" hidden>
+        <div class="card">
+          <h2>Todas as reservas</h2>
+          <div id="all-reservations"></div>
+        </div>
+      </section>
     </main>
 
     <script type="module" src="/src/main.ts"></script>

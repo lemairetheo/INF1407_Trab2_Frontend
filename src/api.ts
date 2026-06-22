@@ -25,9 +25,31 @@ export interface Book {
   author: string;
   description: string;
   status: "pending" | "approved";
+  total_copies: number;
+  available_copies: number;
   created_by: string;
   created_at: string;
   reviews: Review[];
+}
+
+export interface Loan {
+  id: number;
+  book: number;
+  book_title: string;
+  user: string;
+  borrowed_at: string;
+  due_date: string;
+  returned_at: string | null;
+  status: "active" | "returned";
+}
+
+export interface Reservation {
+  id: number;
+  book: number;
+  book_title: string;
+  user: string;
+  created_at: string;
+  status: "waiting" | "fulfilled" | "cancelled";
 }
 
 // --- Gestion du token ------------------------------------------------------
@@ -194,19 +216,19 @@ export function listBooks(): Promise<Book[]> {
   return request<Book[]>("/books/");
 }
 
-export function createBook(
-  data: Pick<Book, "title" | "author" | "description">,
-): Promise<Book> {
+export type BookInput = Pick<
+  Book,
+  "title" | "author" | "description" | "total_copies"
+>;
+
+export function createBook(data: BookInput): Promise<Book> {
   return request<Book>("/books/", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function updateBook(
-  id: number,
-  data: Pick<Book, "title" | "author" | "description">,
-): Promise<Book> {
+export function updateBook(id: number, data: BookInput): Promise<Book> {
   return request<Book>(`/books/${id}/`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -219,6 +241,32 @@ export function deleteBook(id: number): Promise<void> {
 
 export function approveBook(id: number): Promise<Book> {
   return request<Book>(`/books/${id}/approve/`, { method: "POST" });
+}
+
+// --- Emprunts et reservations ----------------------------------------------
+
+export function borrowBook(id: number): Promise<Loan> {
+  return request<Loan>(`/books/${id}/borrow/`, { method: "POST" });
+}
+
+export function reserveBook(id: number): Promise<Reservation> {
+  return request<Reservation>(`/books/${id}/reserve/`, { method: "POST" });
+}
+
+export function listLoans(): Promise<Loan[]> {
+  return request<Loan[]>("/loans/");
+}
+
+export function returnLoan(id: number): Promise<Loan> {
+  return request<Loan>(`/loans/${id}/return/`, { method: "POST" });
+}
+
+export function listReservations(): Promise<Reservation[]> {
+  return request<Reservation[]>("/reservations/");
+}
+
+export function cancelReservation(id: number): Promise<void> {
+  return request<void>(`/reservations/${id}/`, { method: "DELETE" });
 }
 
 // --- Avis ------------------------------------------------------------------
