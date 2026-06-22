@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro — Biblioteca Comunitária</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <div class="card">
+        <h2>Criar conta</h2>
+        <form id="register-form">
+          <label for="username">Usuário</label>
+          <input id="username" required autocomplete="username" />
+
+          <label for="email">Email</label>
+          <input id="email" type="email" required autocomplete="email" />
+
+          <label for="password">Senha</label>
+          <input id="password" type="password" required autocomplete="new-password" />
+
+          <button class="btn" type="submit">Cadastrar</button>
+        </form>
+        <div id="message"></div>
+        <p class="center-link">Já tem conta? <a href="login.html">Entrar</a></p>
+      </div>
+    </div>
+    <script type="module" src="/src/register.ts"></script>
+  </body>
+</html>

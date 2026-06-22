@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meu painel — Biblioteca Comunitária</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>📚 Biblioteca Comunitária</h1>
+      <nav>
+        <span id="user-info" class="muted"></span>
+        <a href="index.html">Início</a>
+        <a href="change-password.html">Trocar senha</a>
+        <button id="logout">Sair</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Formulaire d'ajout / sugestao de livre -->
+      <div class="card">
+        <h2 id="form-title">Sugerir um livro</h2>
+        <p id="form-hint" class="muted"></p>
+        <form id="book-form">
+          <input type="hidden" id="book-id" />
+          <label for="title">Título</label>
+          <input id="title" required />
+
+          <label for="author">Autor</label>
+          <input id="author" required />
+
+          <label for="description">Descrição</label>
+          <textarea id="description"></textarea>
+
+          <button class="btn" type="submit" id="submit-btn">Enviar</button>
+          <button class="btn secondary" type="button" id="cancel-edit" hidden>
+            Cancelar edição
+          </button>
+        </form>
+        <div id="form-message"></div>
+      </div>
+
+      <!-- Zone de moderation (admin uniquement) -->
+      <div class="card" id="pending-card" hidden>
+        <h2>Aguardando aprovação</h2>
+        <div id="pending-list"></div>
+      </div>
+
+      <!-- Catalogue -->
+      <div class="card">
+        <h2>Catálogo</h2>
+        <div id="books-list"><p class="muted">Carregando…</p></div>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

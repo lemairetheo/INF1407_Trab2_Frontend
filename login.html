@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entrar — Biblioteca Comunitária</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <div class="card">
+        <h2>Entrar</h2>
+        <form id="login-form">
+          <label for="username">Usuário</label>
+          <input id="username" name="username" required autocomplete="username" />
+
+          <label for="password">Senha</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+          />
+
+          <button class="btn" type="submit">Entrar</button>
+        </form>
+        <div id="message"></div>
+        <p class="center-link"><a href="forgot-password.html">Esqueci minha senha</a></p>
+        <p class="center-link">Não tem conta? <a href="register.html">Cadastre-se</a></p>
+      </div>
+    </div>
+    <script type="module" src="/src/login.ts"></script>
+  </body>
+</html>
